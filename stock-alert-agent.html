@@ -1,0 +1,1252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic Daily Assistant</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f3;
+      --panel: #ffffff;
+      --ink: #202321;
+      --muted: #657067;
+      --line: #d9dfd7;
+      --accent: #206a5d;
+      --accent-2: #b85c38;
+      --warn: #a33b20;
+      --good: #257247;
+      --soft: #e8efe8;
+      --shadow: 0 12px 30px rgba(32, 35, 33, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 5vw, 4.5rem);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 660px;
+      line-height: 1.55;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 8px;
+      min-height: 40px;
+      padding: 0 14px;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    button.danger {
+      border-color: #e5b8aa;
+      color: var(--warn);
+    }
+
+    button:focus,
+    input:focus,
+    select:focus {
+      outline: 3px solid rgba(32, 106, 93, 0.22);
+      outline-offset: 2px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 390px) 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    section,
+    aside {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 650;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fbfcfa;
+      color: var(--ink);
+      border-radius: 8px;
+      min-height: 40px;
+      padding: 0 11px;
+    }
+
+    textarea {
+      min-height: 86px;
+      resize: vertical;
+      padding-top: 10px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .tabs {
+      display: flex;
+      padding: 6px;
+      background: var(--soft);
+      border-radius: 8px;
+      margin-bottom: 14px;
+      gap: 6px;
+    }
+
+    .tab {
+      flex: 1;
+      border: 0;
+      background: transparent;
+      min-height: 36px;
+    }
+
+    .tab.active {
+      background: white;
+      box-shadow: 0 1px 8px rgba(32, 35, 33, 0.08);
+    }
+
+    .app-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      padding: 6px;
+      background: #e9ece7;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .app-tab {
+      flex: 1;
+      min-height: 44px;
+      border: 0;
+      background: transparent;
+      font-weight: 750;
+    }
+
+    .app-tab.active {
+      background: var(--panel);
+      box-shadow: 0 1px 8px rgba(32, 35, 33, 0.08);
+    }
+
+    .view[hidden] {
+      display: none;
+    }
+
+    .stock-list,
+    .alert-list,
+    .briefing-list,
+    .task-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .stock-card,
+    .alert-card,
+    .briefing-card,
+    .task-card,
+    .automation-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfa;
+    }
+
+    .stock-top,
+    .alert-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .symbol {
+      font-weight: 800;
+      font-size: 1.05rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 750;
+    }
+
+    .badge.warn {
+      color: var(--warn);
+      background: #fae8e1;
+    }
+
+    .meta,
+    .holding-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+
+    .holding-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(110px, 1fr));
+      color: var(--ink);
+    }
+
+    .holding-grid span {
+      display: grid;
+      gap: 3px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      background: white;
+    }
+
+    .holding-grid small {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .gain {
+      color: var(--good);
+    }
+
+    .loss {
+      color: var(--warn);
+    }
+
+    .catalog-note {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .day-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .briefing-hero {
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      margin-bottom: 14px;
+    }
+
+    .briefing-hero strong {
+      font-size: 1.45rem;
+    }
+
+    .day-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .priority-high {
+      color: var(--warn);
+    }
+
+    .priority-normal {
+      color: var(--accent);
+    }
+
+    .connection-status {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfcfa;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .rules {
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .rule {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      border-top: 1px dashed var(--line);
+      padding-top: 7px;
+    }
+
+    .price-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .price-row input {
+      min-width: 0;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      color: var(--muted);
+      text-align: center;
+      background: #fbfcfa;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.5rem;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 650;
+    }
+
+    @media (max-width: 860px) {
+      main {
+        padding: 18px;
+      }
+
+      header,
+      .layout,
+      .day-layout {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .toolbar {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .split,
+      .holding-grid,
+      .status-row,
+      .price-row,
+      .app-tabs {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Agentic Daily Assistant</h1>
+        <p>Track NSE portfolio alerts and get a daily briefing from PA-added tasks, planned slots, and scheduled follow-ups.</p>
+      </div>
+      <div class="toolbar">
+        <button id="seedBtn" type="button">Load sample</button>
+        <button id="clearBtn" class="danger" type="button">Reset</button>
+        <button id="runBtn" class="primary" type="button">Check alerts</button>
+      </div>
+    </header>
+
+    <nav class="app-tabs" aria-label="Assistant areas">
+      <button class="app-tab active" data-view="marketsView" type="button">Market Alerts</button>
+      <button class="app-tab" data-view="dayView" type="button">Day Assistant</button>
+    </nav>
+
+    <div id="marketsView" class="view">
+      <div class="status-row" aria-live="polite">
+        <div class="stat"><strong id="stockCount">0</strong><span>Stocks</span></div>
+        <div class="stat"><strong id="investedValue">₹0</strong><span>Invested</span></div>
+        <div class="stat"><strong id="currentValue">₹0</strong><span>Current value</span></div>
+        <div class="stat"><strong id="ruleCount">0</strong><span>Active rules</span></div>
+        <div class="stat"><strong id="alertCount">0</strong><span>Alerts</span></div>
+      </div>
+
+      <div class="layout">
+        <aside class="panel">
+          <h2>Add NSE Stock</h2>
+          <form id="stockForm" class="form-grid">
+            <div class="split">
+              <label>NSE symbol or company
+                <input id="symbolInput" required list="nseSymbols" placeholder="RELIANCE or Tata Consultancy">
+                <datalist id="nseSymbols"></datalist>
+              </label>
+              <label>Group
+                <select id="groupInput">
+                  <option>Portfolio</option>
+                  <option>Wishlist</option>
+                </select>
+              </label>
+            </div>
+            <div class="split">
+              <label>Current price
+                <input id="priceInput" required type="number" min="0" step="0.01" placeholder="2850.00">
+              </label>
+              <label>Quantity owned
+                <input id="quantityInput" type="number" min="0" step="1" placeholder="0">
+              </label>
+            </div>
+            <label>Average buy price
+              <input id="avgBuyInput" type="number" min="0" step="0.01" placeholder="Only for portfolio holdings">
+            </label>
+            <p class="catalog-note">The search list is seeded with popular NSE equities. The full official NSE equity CSV can replace this local list when we add a live backend.</p>
+            <button class="primary" type="submit">Save stock</button>
+          </form>
+
+          <hr style="border:0;border-top:1px solid var(--line);margin:20px 0;">
+
+          <h2>Add Alert Rule</h2>
+          <form id="ruleForm" class="form-grid">
+            <label>Stock
+              <select id="ruleStockInput"></select>
+            </label>
+            <div class="split">
+              <label>Condition
+                <select id="operatorInput">
+                  <option value="below">Price below</option>
+                  <option value="above">Price above</option>
+                </select>
+              </label>
+              <label>Threshold
+                <input id="thresholdInput" required type="number" min="0" step="0.01" placeholder="175.00">
+              </label>
+            </div>
+            <label>Alert message
+              <input id="messageInput" placeholder="Time to review this stock">
+            </label>
+            <button type="submit">Add rule</button>
+          </form>
+        </aside>
+
+        <section class="panel">
+          <div class="tabs" role="tablist" aria-label="Stock groups">
+            <button class="tab active" data-tab="All" type="button">All</button>
+            <button class="tab" data-tab="Portfolio" type="button">Portfolio</button>
+            <button class="tab" data-tab="Wishlist" type="button">Wishlist</button>
+          </div>
+
+          <div id="stockList" class="stock-list"></div>
+
+          <hr style="border:0;border-top:1px solid var(--line);margin:20px 0;">
+
+          <h2>Alert Inbox</h2>
+          <div id="alertList" class="alert-list"></div>
+        </section>
+      </div>
+    </div>
+
+    <div id="dayView" class="view" hidden>
+      <div class="day-layout">
+        <aside class="panel">
+          <h2>PA Task Intake</h2>
+          <div class="briefing-card">
+            <strong>Add tasks directly to the day plan</strong>
+            <p style="margin-top:6px;">Your PA can capture the action, assign a slot, and leave context for your daily report.</p>
+          </div>
+          <form id="paTaskForm" class="form-grid" style="margin-top:14px;">
+            <label>Task
+              <input id="paTaskTitleInput" required placeholder="Call Rahul about roadmap review">
+            </label>
+            <div class="split">
+              <label>Slot
+                <input id="paTaskSlotInput" type="datetime-local">
+              </label>
+              <label>Priority
+                <select id="paTaskPriorityInput">
+                  <option value="high">High</option>
+                  <option value="normal" selected>Normal</option>
+                  <option value="low">Low</option>
+                </select>
+              </label>
+            </div>
+            <label>Added by
+              <select id="paTaskOwnerInput">
+                <option value="PA">PA</option>
+                <option value="Me">Me</option>
+              </select>
+            </label>
+            <label>Context for report
+              <textarea id="paTaskNoteInput" placeholder="Why it matters, who is involved, or what decision is needed"></textarea>
+            </label>
+            <button class="primary" type="submit">Add to day plan</button>
+          </form>
+          <div class="day-actions">
+            <button id="generateBriefingBtn" class="primary" type="button">Make daily report</button>
+            <button id="clearBriefingBtn" type="button">Clear day updates</button>
+          </div>
+
+          <hr style="border:0;border-top:1px solid var(--line);margin:20px 0;">
+
+          <h2>Automations</h2>
+          <div id="automationList" class="task-list"></div>
+        </aside>
+
+        <section class="panel">
+          <div class="briefing-hero">
+            <strong id="daySummaryTitle">Your day briefing is ready to build.</strong>
+            <p id="daySummaryText">Make a daily report to see PA-added tasks, planned slots, priorities, and follow-ups in one place.</p>
+          </div>
+
+          <h2>Daily Report</h2>
+          <div id="dailyReportList" class="briefing-list"></div>
+
+          <hr style="border:0;border-top:1px solid var(--line);margin:20px 0;">
+
+          <h2>Day Plan Tasks</h2>
+          <div id="suggestedTaskList" class="task-list"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const NSE_MASTER = [
+      { symbol: "RELIANCE", name: "Reliance Industries Ltd" },
+      { symbol: "TCS", name: "Tata Consultancy Services Ltd" },
+      { symbol: "HDFCBANK", name: "HDFC Bank Ltd" },
+      { symbol: "ICICIBANK", name: "ICICI Bank Ltd" },
+      { symbol: "INFY", name: "Infosys Ltd" },
+      { symbol: "BHARTIARTL", name: "Bharti Airtel Ltd" },
+      { symbol: "SBIN", name: "State Bank of India" },
+      { symbol: "LICI", name: "Life Insurance Corporation of India" },
+      { symbol: "ITC", name: "ITC Ltd" },
+      { symbol: "HINDUNILVR", name: "Hindustan Unilever Ltd" },
+      { symbol: "LT", name: "Larsen & Toubro Ltd" },
+      { symbol: "BAJFINANCE", name: "Bajaj Finance Ltd" },
+      { symbol: "HCLTECH", name: "HCL Technologies Ltd" },
+      { symbol: "SUNPHARMA", name: "Sun Pharmaceutical Industries Ltd" },
+      { symbol: "MARUTI", name: "Maruti Suzuki India Ltd" },
+      { symbol: "KOTAKBANK", name: "Kotak Mahindra Bank Ltd" },
+      { symbol: "AXISBANK", name: "Axis Bank Ltd" },
+      { symbol: "M&M", name: "Mahindra & Mahindra Ltd" },
+      { symbol: "ULTRACEMCO", name: "UltraTech Cement Ltd" },
+      { symbol: "TITAN", name: "Titan Company Ltd" },
+      { symbol: "NTPC", name: "NTPC Ltd" },
+      { symbol: "ONGC", name: "Oil and Natural Gas Corporation Ltd" },
+      { symbol: "ADANIENT", name: "Adani Enterprises Ltd" },
+      { symbol: "ADANIPORTS", name: "Adani Ports and Special Economic Zone Ltd" },
+      { symbol: "POWERGRID", name: "Power Grid Corporation of India Ltd" },
+      { symbol: "TATAMOTORS", name: "Tata Motors Ltd" },
+      { symbol: "BAJAJFINSV", name: "Bajaj Finserv Ltd" },
+      { symbol: "COALINDIA", name: "Coal India Ltd" },
+      { symbol: "ASIANPAINT", name: "Asian Paints Ltd" },
+      { symbol: "NESTLEIND", name: "Nestle India Ltd" },
+      { symbol: "WIPRO", name: "Wipro Ltd" },
+      { symbol: "JSWSTEEL", name: "JSW Steel Ltd" },
+      { symbol: "TATASTEEL", name: "Tata Steel Ltd" },
+      { symbol: "GRASIM", name: "Grasim Industries Ltd" },
+      { symbol: "HINDALCO", name: "Hindalco Industries Ltd" },
+      { symbol: "TECHM", name: "Tech Mahindra Ltd" },
+      { symbol: "CIPLA", name: "Cipla Ltd" },
+      { symbol: "DRREDDY", name: "Dr. Reddy's Laboratories Ltd" },
+      { symbol: "DIVISLAB", name: "Divi's Laboratories Ltd" },
+      { symbol: "EICHERMOT", name: "Eicher Motors Ltd" },
+      { symbol: "HEROMOTOCO", name: "Hero MotoCorp Ltd" },
+      { symbol: "BAJAJ-AUTO", name: "Bajaj Auto Ltd" },
+      { symbol: "BRITANNIA", name: "Britannia Industries Ltd" },
+      { symbol: "APOLLOHOSP", name: "Apollo Hospitals Enterprise Ltd" },
+      { symbol: "INDUSINDBK", name: "IndusInd Bank Ltd" },
+      { symbol: "SBILIFE", name: "SBI Life Insurance Company Ltd" },
+      { symbol: "HDFCLIFE", name: "HDFC Life Insurance Company Ltd" },
+      { symbol: "BPCL", name: "Bharat Petroleum Corporation Ltd" },
+      { symbol: "IOC", name: "Indian Oil Corporation Ltd" },
+      { symbol: "TATACONSUM", name: "Tata Consumer Products Ltd" },
+      { symbol: "LTIM", name: "LTIMindtree Ltd" },
+      { symbol: "SHRIRAMFIN", name: "Shriram Finance Ltd" },
+      { symbol: "UPL", name: "UPL Ltd" },
+      { symbol: "DMART", name: "Avenue Supermarts Ltd" },
+      { symbol: "GAIL", name: "GAIL India Ltd" },
+      { symbol: "VEDL", name: "Vedanta Ltd" },
+      { symbol: "PIDILITIND", name: "Pidilite Industries Ltd" },
+      { symbol: "DABUR", name: "Dabur India Ltd" },
+      { symbol: "GODREJCP", name: "Godrej Consumer Products Ltd" },
+      { symbol: "MARICO", name: "Marico Ltd" },
+      { symbol: "COLPAL", name: "Colgate-Palmolive India Ltd" },
+      { symbol: "AMBUJACEM", name: "Ambuja Cements Ltd" },
+      { symbol: "ACC", name: "ACC Ltd" },
+      { symbol: "SHREECEM", name: "Shree Cement Ltd" },
+      { symbol: "BANKBARODA", name: "Bank of Baroda" },
+      { symbol: "PNB", name: "Punjab National Bank" },
+      { symbol: "CANBK", name: "Canara Bank" },
+      { symbol: "UNIONBANK", name: "Union Bank of India" },
+      { symbol: "IDFCFIRSTB", name: "IDFC First Bank Ltd" },
+      { symbol: "FEDERALBNK", name: "The Federal Bank Ltd" },
+      { symbol: "YESBANK", name: "Yes Bank Ltd" },
+      { symbol: "IRCTC", name: "Indian Railway Catering and Tourism Corporation Ltd" },
+      { symbol: "IRFC", name: "Indian Railway Finance Corporation Ltd" },
+      { symbol: "RVNL", name: "Rail Vikas Nigam Ltd" },
+      { symbol: "HAL", name: "Hindustan Aeronautics Ltd" },
+      { symbol: "BEL", name: "Bharat Electronics Ltd" },
+      { symbol: "BHEL", name: "Bharat Heavy Electricals Ltd" },
+      { symbol: "TATAPOWER", name: "Tata Power Company Ltd" },
+      { symbol: "ADANIGREEN", name: "Adani Green Energy Ltd" },
+      { symbol: "ADANIPOWER", name: "Adani Power Ltd" },
+      { symbol: "JIOFIN", name: "Jio Financial Services Ltd" },
+      { symbol: "ZOMATO", name: "Zomato Ltd" },
+      { symbol: "NYKAA", name: "FSN E-Commerce Ventures Ltd" },
+      { symbol: "PAYTM", name: "One 97 Communications Ltd" },
+      { symbol: "POLYCAB", name: "Polycab India Ltd" },
+      { symbol: "DIXON", name: "Dixon Technologies India Ltd" },
+      { symbol: "TRENT", name: "Trent Ltd" },
+      { symbol: "VBL", name: "Varun Beverages Ltd" },
+      { symbol: "NAUKRI", name: "Info Edge India Ltd" },
+      { symbol: "CDSL", name: "Central Depository Services India Ltd" },
+      { symbol: "BSE", name: "BSE Ltd" },
+      { symbol: "MCX", name: "Multi Commodity Exchange of India Ltd" },
+      { symbol: "INDIGO", name: "InterGlobe Aviation Ltd" },
+      { symbol: "CONCOR", name: "Container Corporation of India Ltd" },
+      { symbol: "MOTHERSON", name: "Samvardhana Motherson International Ltd" },
+      { symbol: "ASHOKLEY", name: "Ashok Leyland Ltd" },
+      { symbol: "TVSMOTOR", name: "TVS Motor Company Ltd" },
+      { symbol: "SIEMENS", name: "Siemens Ltd" },
+      { symbol: "ABB", name: "ABB India Ltd" },
+      { symbol: "CGPOWER", name: "CG Power and Industrial Solutions Ltd" }
+    ];
+
+    const storageKey = "stock-alert-agent-state-v2";
+    const state = loadState();
+    let activeTab = "All";
+    let activeView = "marketsView";
+
+    const samplePaTasks = [
+      {
+        title: "Upload missing receipts and submit May expense report",
+        slot: "2026-06-05T15:00",
+        priority: "high",
+        owner: "PA",
+        note: "Finance needs the May expense report and two missing receipts before 3 PM.",
+        automation: "Prepare update"
+      },
+      {
+        title: "Share review availability with Rahul",
+        slot: "2026-06-05T11:30",
+        priority: "normal",
+        owner: "PA",
+        note: "Rahul asked for a 20-minute slot to discuss comments on the assistant roadmap.",
+        automation: "Prepare update"
+      },
+      {
+        title: "Prepare vendor call notes",
+        slot: "2026-06-05T16:00",
+        priority: "normal",
+        owner: "PA",
+        note: "Vendor call is at 4:30 PM. Prep notes should be ready before the meeting.",
+        automation: "Prepare update"
+      }
+    ];
+
+    const defaultAutomations = [
+      { title: "PA task intake", description: "Capture tasks, context, priority, and the planned slot.", status: "Live" },
+      { title: "Daily report", description: "Summarize open work, completed work, and unslotted follow-ups.", status: "Live" },
+      { title: "End-of-day review", description: "Carry unfinished tasks forward for tomorrow's report.", status: "Next" }
+    ];
+
+    const stockForm = document.querySelector("#stockForm");
+    const ruleForm = document.querySelector("#ruleForm");
+    const stockList = document.querySelector("#stockList");
+    const alertList = document.querySelector("#alertList");
+    const ruleStockInput = document.querySelector("#ruleStockInput");
+    const symbolInput = document.querySelector("#symbolInput");
+    const groupInput = document.querySelector("#groupInput");
+    const quantityInput = document.querySelector("#quantityInput");
+    const avgBuyInput = document.querySelector("#avgBuyInput");
+    const nseSymbols = document.querySelector("#nseSymbols");
+    const daySummaryTitle = document.querySelector("#daySummaryTitle");
+    const daySummaryText = document.querySelector("#daySummaryText");
+    const dailyReportList = document.querySelector("#dailyReportList");
+    const suggestedTaskList = document.querySelector("#suggestedTaskList");
+    const automationList = document.querySelector("#automationList");
+    const paTaskForm = document.querySelector("#paTaskForm");
+    const paTaskTitleInput = document.querySelector("#paTaskTitleInput");
+    const paTaskSlotInput = document.querySelector("#paTaskSlotInput");
+    const paTaskPriorityInput = document.querySelector("#paTaskPriorityInput");
+    const paTaskOwnerInput = document.querySelector("#paTaskOwnerInput");
+    const paTaskNoteInput = document.querySelector("#paTaskNoteInput");
+
+    function loadState() {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) return JSON.parse(saved);
+      return {
+        stocks: [],
+        rules: [],
+        alerts: [],
+        day: { generated: false, tasks: [], completed: [] }
+      };
+    }
+
+    function ensureDayState() {
+      if (!state.day) state.day = { generated: false, tasks: [], completed: [] };
+      if (!Array.isArray(state.day.tasks)) state.day.tasks = [];
+      if (!Array.isArray(state.day.completed)) state.day.completed = [];
+    }
+
+    function saveState() {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    }
+
+    function money(value) {
+      return Number(value || 0).toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
+    }
+
+    function uid(prefix) {
+      return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function normalizeSymbol(value) {
+      return value.trim().split(" - ")[0].toUpperCase();
+    }
+
+    function getStockMeta(symbol) {
+      return NSE_MASTER.find(item => item.symbol === symbol) || { symbol, name: "Custom NSE symbol" };
+    }
+
+    function portfolioTotals() {
+      return state.stocks
+        .filter(stock => stock.group === "Portfolio")
+        .reduce((totals, stock) => {
+          const quantity = Number(stock.quantity || 0);
+          totals.invested += quantity * Number(stock.avgBuyPrice || 0);
+          totals.current += quantity * Number(stock.price || 0);
+          return totals;
+        }, { invested: 0, current: 0 });
+    }
+
+    function renderNseOptions() {
+      nseSymbols.innerHTML = NSE_MASTER
+        .map(item => `<option value="${item.symbol} - ${item.name}"></option>`)
+        .join("");
+    }
+
+    function render() {
+      ensureDayState();
+      const stocks = activeTab === "All" ? state.stocks : state.stocks.filter(stock => stock.group === activeTab);
+      const totals = portfolioTotals();
+      document.querySelector("#stockCount").textContent = state.stocks.length;
+      document.querySelector("#investedValue").textContent = money(totals.invested);
+      document.querySelector("#currentValue").textContent = money(totals.current);
+      document.querySelector("#ruleCount").textContent = state.rules.length;
+      document.querySelector("#alertCount").textContent = state.alerts.length;
+
+      ruleStockInput.innerHTML = state.stocks.length
+        ? state.stocks.map(stock => `<option value="${stock.id}">${stock.symbol} - ${stock.group}</option>`).join("")
+        : `<option value="">Add a stock first</option>`;
+
+      stockList.innerHTML = stocks.length ? stocks.map(stockCard).join("") : `<div class="empty">Add portfolio or wishlist stocks to begin.</div>`;
+      alertList.innerHTML = state.alerts.length ? state.alerts.map(alertCard).join("") : `<div class="empty">No triggered alerts yet.</div>`;
+
+      document.querySelectorAll(".tab").forEach(button => {
+        button.classList.toggle("active", button.dataset.tab === activeTab);
+      });
+      renderDayAssistant();
+      renderViews();
+    }
+
+    function renderViews() {
+      document.querySelectorAll(".view").forEach(view => {
+        view.hidden = view.id !== activeView;
+      });
+      document.querySelectorAll(".app-tab").forEach(button => {
+        button.classList.toggle("active", button.dataset.view === activeView);
+      });
+    }
+
+    function renderDayAssistant() {
+      ensureDayState();
+      const pendingTasks = state.day.tasks.filter(task => !state.day.completed.includes(task.id));
+      const completedTasks = state.day.tasks.filter(task => state.day.completed.includes(task.id));
+      const highPriority = pendingTasks.filter(task => task.priority === "high").length;
+      const slottedTasks = pendingTasks.filter(task => task.slot).length;
+      if (state.day.generated) {
+        daySummaryTitle.textContent = `${pendingTasks.length} actions need your attention today.`;
+        daySummaryText.textContent = `${slottedTasks} tasks have slots, ${highPriority} are high priority, and ${completedTasks.length} are already done.`;
+      } else {
+        daySummaryTitle.textContent = "Your day briefing is ready to build.";
+        daySummaryText.textContent = "Make a daily report to see PA-added tasks, planned slots, priorities, and follow-ups in one place.";
+      }
+
+      dailyReportList.innerHTML = state.day.generated
+        ? dailyReportCards(pendingTasks, completedTasks)
+        : `<div class="empty">No daily report yet. Add tasks, then make the report.</div>`;
+
+      suggestedTaskList.innerHTML = state.day.tasks.length
+        ? state.day.tasks.map(taskCard).join("")
+        : `<div class="empty">No PA-added tasks yet.</div>`;
+
+      automationList.innerHTML = defaultAutomations.map(automationCard).join("");
+    }
+
+    function dailyReportCards(pendingTasks, completedTasks) {
+      const unslottedTasks = pendingTasks.filter(task => !task.slot).length;
+      if (!state.day.tasks.length) return `<div class="empty">No tasks are available for today's report.</div>`;
+      return `
+        <article class="briefing-card">
+          <div class="alert-top">
+            <strong>Open priorities</strong>
+            <span class="badge ${pendingTasks.some(task => task.priority === "high") ? "warn" : ""}">${pendingTasks.length} open</span>
+          </div>
+          <p>${pendingTasks.length ? pendingTasks.map(reportLine).join(" ") : "All planned tasks are complete."}</p>
+        </article>
+        <article class="briefing-card">
+          <div class="alert-top">
+            <strong>Slots and follow-ups</strong>
+            <span class="badge">${unslottedTasks} unslotted</span>
+          </div>
+          <p>${unslottedTasks ? "Some tasks still need a time slot before the day is locked." : "Every open task has a planned slot."}</p>
+        </article>
+        <article class="briefing-card">
+          <div class="alert-top">
+            <strong>Completed today</strong>
+            <span class="badge">${completedTasks.length} done</span>
+          </div>
+          <p>${completedTasks.length ? completedTasks.map(task => task.title).join("; ") : "No tasks have been marked done yet."}</p>
+        </article>
+      `;
+    }
+
+    function reportLine(task) {
+      return `${formatSlot(task.slot)}: ${task.title} (${task.priority || "normal"}, added by ${task.owner || "PA"}).`;
+    }
+
+    function formatSlot(slot) {
+      if (!slot) return "Unslotted";
+      const date = new Date(slot);
+      if (Number.isNaN(date.getTime())) return slot;
+      return date.toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" });
+    }
+
+    function taskCard(task) {
+      const done = state.day.completed.includes(task.id);
+      return `
+        <article class="task-card">
+          <div class="alert-top">
+            <strong>${task.title}</strong>
+            <span class="badge ${done ? "" : "warn"}">${done ? "Done" : "Open"}</span>
+          </div>
+          <div class="meta">
+            <span>${formatSlot(task.slot)}</span>
+            <span class="${task.priority === "high" ? "priority-high" : "priority-normal"}">${task.priority || "normal"}</span>
+            <span>Added by ${task.owner || "PA"}</span>
+          </div>
+          <p>${task.note || "No context added yet."}</p>
+          <div class="toolbar" style="justify-content:flex-start;margin-top:10px;">
+            <button type="button" data-complete-task="${task.id}">${done ? "Reopen" : "Mark done"}</button>
+            <button type="button" data-run-automation="${task.id}">${task.automation}</button>
+            <button class="danger" type="button" data-delete-task="${task.id}">Delete</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function automationCard(item) {
+      return `
+        <article class="automation-card">
+          <div class="alert-top">
+            <strong>${item.title}</strong>
+            <span class="badge">${item.status}</span>
+          </div>
+          <p>${item.description}</p>
+        </article>
+      `;
+    }
+
+    function stockCard(stock) {
+      const rules = state.rules.filter(rule => rule.stockId === stock.id);
+      const quantity = Number(stock.quantity || 0);
+      const avgBuyPrice = Number(stock.avgBuyPrice || 0);
+      const invested = quantity * avgBuyPrice;
+      const current = quantity * Number(stock.price || 0);
+      const pnl = current - invested;
+      const pnlPercent = invested ? (pnl / invested) * 100 : 0;
+      const pnlClass = pnl >= 0 ? "gain" : "loss";
+      const holdingMarkup = stock.group === "Portfolio"
+        ? `
+          <div class="holding-grid">
+            <span><small>Avg buy</small>${money(avgBuyPrice)}</span>
+            <span><small>Invested</small>${money(invested)}</span>
+            <span><small>Current</small>${money(current)}</span>
+            <span><small>P/L</small><b class="${pnlClass}">${money(pnl)} (${pnlPercent.toFixed(2)}%)</b></span>
+          </div>
+        `
+        : "";
+      const ruleMarkup = rules.length
+        ? rules.map(rule => `
+          <div class="rule">
+            <span>${rule.operator === "below" ? "Below" : "Above"} ${money(rule.threshold)}</span>
+            <button type="button" data-delete-rule="${rule.id}">Remove</button>
+          </div>
+        `).join("")
+        : `<span>No rules yet</span>`;
+
+      return `
+        <article class="stock-card">
+          <div class="stock-top">
+            <div>
+              <div class="symbol">${stock.symbol}</div>
+              <div class="meta" style="margin:3px 0 0;">${stock.name || getStockMeta(stock.symbol).name}</div>
+            </div>
+            <span class="badge ${stock.group === "Wishlist" ? "warn" : ""}">${stock.group}</span>
+          </div>
+          <div class="meta">
+            <span>Price ${money(stock.price)}</span>
+            <span>Qty ${stock.quantity || 0}</span>
+          </div>
+          ${holdingMarkup}
+          <div class="price-row">
+            <input type="number" min="0" step="0.01" value="${stock.price}" aria-label="Update ${stock.symbol} price" data-price-input="${stock.id}">
+            <button type="button" data-update-price="${stock.id}">Update</button>
+            <button class="danger" type="button" data-delete-stock="${stock.id}">Delete</button>
+          </div>
+          <div class="rules">${ruleMarkup}</div>
+        </article>
+      `;
+    }
+
+    function alertCard(alert) {
+      return `
+        <article class="alert-card">
+          <div class="alert-top">
+            <strong>${alert.symbol}</strong>
+            <span class="badge">${alert.group}</span>
+          </div>
+          <p>${alert.message}</p>
+          <div class="meta" style="margin-top:8px;">
+            <span>${alert.condition}</span>
+            <span>${new Date(alert.createdAt).toLocaleString()}</span>
+          </div>
+          <button type="button" data-dismiss-alert="${alert.id}">Dismiss</button>
+        </article>
+      `;
+    }
+
+    function runAlerts() {
+      let created = 0;
+      for (const rule of state.rules) {
+        const stock = state.stocks.find(item => item.id === rule.stockId);
+        if (!stock) continue;
+        const passed = rule.operator === "below" ? stock.price < rule.threshold : stock.price > rule.threshold;
+        const existing = state.alerts.find(alert => alert.ruleId === rule.id);
+        if (passed && !existing) {
+          state.alerts.unshift({
+            id: uid("alert"),
+            ruleId: rule.id,
+            symbol: stock.symbol,
+            group: stock.group,
+            message: rule.message || "Stock rule passed. Review this position.",
+            condition: `Price ${money(stock.price)} is ${rule.operator} ${money(rule.threshold)}`,
+            createdAt: new Date().toISOString()
+          });
+          created += 1;
+        }
+        if (!passed && existing) {
+          state.alerts = state.alerts.filter(alert => alert.ruleId !== rule.id);
+        }
+      }
+      saveState();
+      render();
+      return created;
+    }
+
+    stockForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const symbol = normalizeSymbol(symbolInput.value);
+      const meta = getStockMeta(symbol);
+      const group = groupInput.value;
+      const existing = state.stocks.find(stock => stock.symbol === symbol && stock.group === group);
+      if (existing) {
+        existing.price = Number(document.querySelector("#priceInput").value);
+        existing.quantity = Number(quantityInput.value || 0);
+        existing.avgBuyPrice = Number(avgBuyInput.value || 0);
+        existing.name = meta.name;
+      } else {
+        state.stocks.push({
+          id: uid("stock"),
+          symbol,
+          name: meta.name,
+          group,
+          price: Number(document.querySelector("#priceInput").value),
+          quantity: Number(quantityInput.value || 0),
+          avgBuyPrice: Number(avgBuyInput.value || 0)
+        });
+      }
+      stockForm.reset();
+      saveState();
+      render();
+    });
+
+    ruleForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const stockId = ruleStockInput.value;
+      if (!stockId) return;
+      state.rules.push({
+        id: uid("rule"),
+        stockId,
+        operator: document.querySelector("#operatorInput").value,
+        threshold: Number(document.querySelector("#thresholdInput").value),
+        message: document.querySelector("#messageInput").value.trim()
+      });
+      ruleForm.reset();
+      saveState();
+      render();
+    });
+
+    paTaskForm.addEventListener("submit", event => {
+      event.preventDefault();
+      ensureDayState();
+      state.day.tasks.push({
+        id: uid("task"),
+        title: paTaskTitleInput.value.trim(),
+        slot: paTaskSlotInput.value,
+        priority: paTaskPriorityInput.value,
+        owner: paTaskOwnerInput.value,
+        note: paTaskNoteInput.value.trim(),
+        automation: "Prepare update"
+      });
+      state.day.generated = false;
+      paTaskForm.reset();
+      paTaskPriorityInput.value = "normal";
+      paTaskOwnerInput.value = "PA";
+      saveState();
+      render();
+    });
+
+    document.addEventListener("click", event => {
+      const appTab = event.target.closest("[data-view]");
+      if (appTab) {
+        activeView = appTab.dataset.view;
+        render();
+      }
+
+      const tab = event.target.closest("[data-tab]");
+      if (tab) {
+        activeTab = tab.dataset.tab;
+        render();
+      }
+
+      const updatePrice = event.target.closest("[data-update-price]");
+      if (updatePrice) {
+        const id = updatePrice.dataset.updatePrice;
+        const stock = state.stocks.find(item => item.id === id);
+        const input = document.querySelector(`[data-price-input="${id}"]`);
+        stock.price = Number(input.value);
+        saveState();
+        runAlerts();
+      }
+
+      const deleteStock = event.target.closest("[data-delete-stock]");
+      if (deleteStock) {
+        const id = deleteStock.dataset.deleteStock;
+        state.stocks = state.stocks.filter(stock => stock.id !== id);
+        state.rules = state.rules.filter(rule => rule.stockId !== id);
+        state.alerts = state.alerts.filter(alert => alert.ruleId !== id);
+        saveState();
+        render();
+      }
+
+      const deleteRule = event.target.closest("[data-delete-rule]");
+      if (deleteRule) {
+        const id = deleteRule.dataset.deleteRule;
+        state.rules = state.rules.filter(rule => rule.id !== id);
+        state.alerts = state.alerts.filter(alert => alert.ruleId !== id);
+        saveState();
+        render();
+      }
+
+      const dismissAlert = event.target.closest("[data-dismiss-alert]");
+      if (dismissAlert) {
+        const id = dismissAlert.dataset.dismissAlert;
+        state.alerts = state.alerts.filter(alert => alert.id !== id);
+        saveState();
+        render();
+      }
+
+      const completeTask = event.target.closest("[data-complete-task]");
+      if (completeTask) {
+        ensureDayState();
+        const id = completeTask.dataset.completeTask;
+        if (state.day.completed.includes(id)) {
+          state.day.completed = state.day.completed.filter(taskId => taskId !== id);
+        } else {
+          state.day.completed.push(id);
+        }
+        saveState();
+        render();
+      }
+
+      const deleteTask = event.target.closest("[data-delete-task]");
+      if (deleteTask) {
+        ensureDayState();
+        const id = deleteTask.dataset.deleteTask;
+        state.day.tasks = state.day.tasks.filter(task => task.id !== id);
+        state.day.completed = state.day.completed.filter(taskId => taskId !== id);
+        saveState();
+        render();
+      }
+
+      const runAutomation = event.target.closest("[data-run-automation]");
+      if (runAutomation) {
+        ensureDayState();
+        const task = state.day.tasks.find(item => item.id === runAutomation.dataset.runAutomation);
+        if (!task) return;
+        task.note = `${task.note || "No context added yet."} Update prepared locally for the daily report.`;
+        saveState();
+        render();
+      }
+    });
+
+    document.querySelector("#runBtn").addEventListener("click", runAlerts);
+
+    document.querySelector("#clearBtn").addEventListener("click", () => {
+      state.stocks = [];
+      state.rules = [];
+      state.alerts = [];
+      saveState();
+      render();
+    });
+
+    document.querySelector("#generateBriefingBtn").addEventListener("click", () => {
+      ensureDayState();
+      if (!state.day.tasks.length) {
+        state.day.tasks = samplePaTasks.map(task => ({
+          id: uid("task"),
+          ...task
+        }));
+      }
+      state.day.generated = true;
+      saveState();
+      render();
+    });
+
+    document.querySelector("#clearBriefingBtn").addEventListener("click", () => {
+      state.day = { generated: false, tasks: [], completed: [] };
+      saveState();
+      render();
+    });
+
+    document.querySelector("#seedBtn").addEventListener("click", () => {
+      state.stocks = [
+        { id: "stock-reliance", symbol: "RELIANCE", name: "Reliance Industries Ltd", group: "Portfolio", price: 2865.5, quantity: 10, avgBuyPrice: 2520 },
+        { id: "stock-tcs", symbol: "TCS", name: "Tata Consultancy Services Ltd", group: "Portfolio", price: 3860.75, quantity: 6, avgBuyPrice: 3525 },
+        { id: "stock-hdfcbank", symbol: "HDFCBANK", name: "HDFC Bank Ltd", group: "Wishlist", price: 1515.3, quantity: 0, avgBuyPrice: 0 },
+        { id: "stock-tatamotors", symbol: "TATAMOTORS", name: "Tata Motors Ltd", group: "Wishlist", price: 925.2, quantity: 0, avgBuyPrice: 0 }
+      ];
+      state.rules = [
+        { id: "rule-reliance", stockId: "stock-reliance", operator: "above", threshold: 2850, message: "RELIANCE is above your portfolio review level." },
+        { id: "rule-tcs", stockId: "stock-tcs", operator: "below", threshold: 3700, message: "TCS moved below your protection level." },
+        { id: "rule-hdfcbank", stockId: "stock-hdfcbank", operator: "below", threshold: 1520, message: "HDFCBANK is near your wishlist entry price." },
+        { id: "rule-tatamotors", stockId: "stock-tatamotors", operator: "below", threshold: 900, message: "TATAMOTORS is near your desired buy zone." }
+      ];
+      state.alerts = [];
+      saveState();
+      runAlerts();
+    });
+
+    renderNseOptions();
+    render();
+  </script>
+</body>
+</html>
